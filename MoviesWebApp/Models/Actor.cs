@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MoviesWebApp.Data.Base;
+using System.ComponentModel.DataAnnotations;
 
 namespace MoviesWebApp.Models
 {
-    public class Actor
+    public class Actor : IEntityBase
     {
+        // Can remove the Key/Id below because now have class inheriting from
+        // IEntityBase who's Id/Key will override this Key
         [Key]
         public int Id { get; set; }
 
