@@ -5,9 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MoviesWebApp.Models
 {
-    public class Movie : IEntityBase
+    public class NewMovieVM
     {
-        [Key]
         public int Id { get; set; }
 
         [Display(Name="Name of Movie")]
@@ -22,8 +21,8 @@ namespace MoviesWebApp.Models
         [Required(ErrorMessage = "Price required")]
         public double Price { get; set; }
 
-        [Display(Name = "Movie Poster")]
-        [Required(ErrorMessage = "Poster image required")]
+        [Display(Name = "Movie Poster URL")]
+        [Required(ErrorMessage = "Poster image url is required")]
         public string? ImageURL { get; set; }
 
         [Display(Name = "Movie Start Date")]
@@ -31,21 +30,24 @@ namespace MoviesWebApp.Models
         public DateTime StartDate { get; set; }
 
         [Display(Name = "Movie End Date")]
+        [Required(ErrorMessage = "End date required")]
         public DateTime EndDate { get; set; }
 
-        [Display(Name = "Movie Genre")]
-        [Required(ErrorMessage = "Genre required")]
+        [Display(Name = "Movie Category")]
+        [Required(ErrorMessage = "Movie Category is required")]
         public MovieCategory MovieCategory { get; set; }
 
         // Relationships
-        public List<Actor_Movie>? Actors_Movies { get; set; }
+        [Display(Name = "Select actor(s)")]
+        [Required(ErrorMessage ="Movie actor(s) is required")]
+        public List<int>? ActorIds { get; set; }
 
-        [ForeignKey("CinemaId")]
+        [Display(Name = "Select a cinema")]
+        [Required(ErrorMessage = "Cinema is required")]
         public int CinemaId { get; set; }
-        public Cinema? Cinema { get; set; }
 
-        [ForeignKey("ProducerId")]
+        [Display(Name = "Select a producer")]
+        [Required(ErrorMessage = "Movie producer is required")]
         public int ProducerId { get; set; }
-        public Producer? Producer { get; set; }
     }
 }
