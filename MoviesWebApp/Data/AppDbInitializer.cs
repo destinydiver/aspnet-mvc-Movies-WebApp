@@ -1,4 +1,6 @@
-﻿using MoviesWebApp.Data.Enums;
+﻿using Microsoft.AspNetCore.Identity;
+using MoviesWebApp.Data.Enums;
+using MoviesWebApp.Data.Static;
 using MoviesWebApp.Models;
 
 namespace MoviesWebApp.Data
@@ -310,6 +312,62 @@ namespace MoviesWebApp.Data
                         },
                     });
                     context.SaveChanges();
+                }
+            }
+        }
+
+        public static async Task SeedUsersAndRolesAsync(IApplicationBuilder applicationBuilder)
+        {
+            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            {
+
+                // ROLES
+                var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                }
+
+                if (!await roleManager.RoleExistsAsync(UserRoles.User))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                }
+
+                // USERS
+                // Below, we created a custom User Class: ApplicationUser instead of the default: IdentityUser
+                var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                string adminUserEmail = "admin@movieswebapp.com";
+                var adminUser = await userManager.FindByEmailAsync(adminUserEmail);
+                if (adminUser == null)
+                {
+                    var newAdminUser = new ApplicationUser()
+                    {
+                        FullName = "Admin User",
+                        UserName = "admin-user",
+                        Email = adminUserEmail,
+                        EmailConfirmed = true,
+                    };
+                    //Below 2 lines are adding a new user, in this case named "newAdminUser" and assigning role as an "Admin"
+                    await userManager.CreateAsync(newAdminUser, "Coding@1234?");
+                    await userManager.AddToRoleAsync(newAdminUser, UserRoles.Admin);
+                }
+
+
+                string appUserEmail = "user@movieswebapp.com";
+                var appUser = await userManager.FindByEmailAsync(appUserEmail);
+                if (appUser == null)
+                {
+                    var newAppUser = new ApplicationUser()
+                    {
+                        FullName = "Application User",
+                        UserName = "app-user",
+                        Email = appUserEmail,
+                        EmailConfirmed = true,
+                    };
+                    //Below 2 lines are adding a new user, in this case named "newAdminUser" and assigning role as an "Admin"
+                    await userManager.CreateAsync(newAppUser, "Coding@1234?");
+                    await userManager.AddToRoleAsync(newAppUser, UserRoles.User);
                 }
             }
         }

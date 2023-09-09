@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MoviesWebApp.Data.Cart;
 using MoviesWebApp.Data.Services;
+using MoviesWebApp.Data.Static;
 using MoviesWebApp.Data.ViewModels;
+using System.Security.Claims;
 
 namespace MoviesWebApp.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly IMoviesService _moviesService;
@@ -20,9 +24,11 @@ namespace MoviesWebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            string userId = string.Empty;
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      // Can write above line: string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);   
+            string userRole = User.FindFirstValue(ClaimTypes.Role);
 
-            var orders = await _ordersService.GetOrdersByUserIdAsync(userId);
+            var orders = await _ordersService.GetOrdersByUserIdAndRoleAsync(userId, userRole);
             return View(orders);
         }
 
@@ -67,8 +73,8 @@ namespace MoviesWebApp.Controllers
         public async Task<IActionResult> CompleteOrder()
         {
             var items = _shoppingCart.GetShoppingCartItems();
-            string userId = string.Empty;
-            string userEmailAddress = string.Empty;
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userEmailAddress = User.FindFirstValue(ClaimTypes.Email);
 
             await _ordersService.StoreOrderAsync(items, userId, userEmailAddress);
             await _shoppingCart.ClearShoppingCartAsync();

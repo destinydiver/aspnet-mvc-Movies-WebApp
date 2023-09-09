@@ -1,24 +1,35 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MoviesWebApp.Data;
 using MoviesWebApp.Data.Cart;
 using MoviesWebApp.Data.Services;
+using MoviesWebApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<MovieAppDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+});
 builder.Services.AddScoped<IActorsService, ActorsService>();
 builder.Services.AddScoped<IProducersService, ProducersService>();
 builder.Services.AddScoped<ICinemasService, CinemasService>();
 builder.Services.AddScoped<IMoviesService, MoviesService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
-builder.Services.AddSession();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped(sc => ShoppingCart.GetShoppingCart(sc));
-builder.Services.AddDbContext<MovieAppDbContext>( options =>
+// Authentication & Authorization 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MovieAppDbContext>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSession();
+builder.Services.AddAuthentication(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 });
+
 
 var app = builder.Build();
 
@@ -36,6 +47,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -44,5 +56,5 @@ app.MapControllerRoute(
 
 // Seed Database
 AppDbInitializer.Seed(app);
-
+AppDbInitializer.SeedUsersAndRolesAsync(app).Wait();
 app.Run();

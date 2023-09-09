@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesWebApp.Data;
 using MoviesWebApp.Data.Services;
+using MoviesWebApp.Data.Static;
 using MoviesWebApp.Models;
 
 namespace MoviesWebApp.Controllers
 {
+    [Authorize(Roles = UserRoles.Admin)]
     public class CinemasController : Controller
     {
         private readonly ICinemasService _service;
@@ -15,6 +18,7 @@ namespace MoviesWebApp.Controllers
             _service = service;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var allCinemas = await _service.GetAllAsync();
@@ -37,6 +41,7 @@ namespace MoviesWebApp.Controllers
         }
 
         // GET: Cinemas/Details/Id
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             var cinemaDetails = await _service.GetByIdAsync(id);
